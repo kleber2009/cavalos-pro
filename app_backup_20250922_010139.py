@@ -526,7 +526,7 @@ class ExtractorCavalos:
         joquei_stats = cavalo.get('joquei_stats')
         treinador_stats = cavalo.get('treinador_stats')
         
-        # Calcular scores individuais usando algoritmo híbrido MELHORADO V2.0
+        # Calcular scores individuais usando algoritmo híbrido
         rating_score = self._calcular_score_rating(official_rating)
         forma_score = self._calcular_score_forma_melhorado(forma)
         peso_score = self._calcular_score_peso_melhorado(peso)
@@ -534,12 +534,6 @@ class ExtractorCavalos:
         treinador_score = self._calcular_score_treinador(treinador, treinador_stats)
         idade_pts = self._idade_para_pontos(idade)
         draw_score = self._calcular_score_draw(draw)
-        
-        # MELHORIAS V2.0: Análise de value bets e dark horses
-        odds_numericas = self._converter_odds_para_numero(odds)
-        is_value_bet = self._detectar_value_bet(rating_score + forma_score, odds_numericas)
-        is_dark_horse = self._detectar_dark_horse(joquei_score, forma_score, odds_numericas)
-        bonus_outsider = self._calcular_bonus_outsider(odds_numericas)
         
         # NOVOS FATORES QUALITATIVOS (inspirados na análise de especialistas)
         momentum_score = self._calcular_momentum_qualitativo(cavalo)
@@ -555,19 +549,19 @@ class ExtractorCavalos:
             joquei_score = score_posicao
             forma_score = score_posicao
         
-        # ALGORITMO HÍBRIDO V2.0 - Pesos ajustados baseados na análise de Southwell
+        # ALGORITMO HÍBRIDO - Pesos dos critérios (quantitativos + qualitativos)
         pesos = {
-            'Rating': 0.18,     # Reduzido (era 0.20)
-            'Forma': 0.25,      # AUMENTADO (era 0.16) - forma recente é crucial
-            'Peso': 0.06,       # Reduzido (era 0.08)
-            'Jockey': 0.18,     # AUMENTADO (era 0.12) - jóquei é muito importante
-            'Treinador': 0.08,  # Mantido
-            'Idade_pts': 0.05,  # Reduzido (era 0.07)
-            'Draw': 0.05,       # Reduzido (era 0.07)
-            'Odds': 0.03,       # Reduzido (era 0.04)
-            'Momentum': 0.06,   # Reduzido (era 0.08)
-            'Contexto': 0.04,   # Reduzido (era 0.06)
-            'Valor_Aposta': 0.02  # Reduzido (era 0.04)
+            'Rating': 0.20,
+            'Forma': 0.16,
+            'Peso': 0.08,
+            'Jockey': 0.12,
+            'Treinador': 0.08,
+            'Idade_pts': 0.07,
+            'Draw': 0.07,
+            'Odds': 0.04,
+            'Momentum': 0.08,  # Novo fator qualitativo
+            'Contexto': 0.06,  # Novo fator qualitativo
+            'Valor_Aposta': 0.04  # Novo fator qualitativo
         }
         
         # Calcular score de odds
@@ -588,14 +582,8 @@ class ExtractorCavalos:
             valor_aposta_score * pesos['Valor_Aposta']
         )
         
-        # APLICAR MELHORIAS V2.0: Bônus outsider e ajustes
-        pontuacao_final_v2 = pontuacao_final * bonus_outsider
-        
         # Converter para escala 0-100 para compatibilidade
-        score_total = round(pontuacao_final_v2 * 10, 1)
-        
-        # CATEGORIZAÇÃO V2.0
-        categoria_v2 = self._classificar_cavalo_v2(score_total, odds_numericas, is_value_bet, is_dark_horse)
+        score_total = round(pontuacao_final * 10, 1)
         
         # ANÁLISE AVANÇADA ADICIONAL - Manter funcionalidades existentes
         tendencia_peso = self._analisar_tendencia_peso(forma, peso)
@@ -659,13 +647,6 @@ class ExtractorCavalos:
             'probabilidade_vitoria': probabilidade_vitoria,
             'score_total': score_total,
             'recomendacao': recomendacao,
-            # MELHORIAS V2.0
-            'categoria_v2': categoria_v2,
-            'is_value_bet': is_value_bet,
-            'is_dark_horse': is_dark_horse,
-            'bonus_outsider': bonus_outsider,
-            'odds_numericas': odds_numericas,
-            'algoritmo_versao': 'V2.0_Melhorado_Southwell',
             'analise_hibrida': {
                 'quantitativo': {
                     'rating': rating_score,
@@ -2856,60 +2837,6 @@ class ExtractorCavalos:
             return False
         
         return True
-
-    # ============================================================
-    # MÉTODOS AUXILIARES V2.0 - MELHORIAS BASEADAS EM SOUTHWELL
-    # ============================================================
-    
-    def _converter_odds_para_numero(self, odds):
-        """Converte odds para número decimal"""
-        try:
-            if isinstance(odds, (int, float)):
-                return float(odds)
-            if isinstance(odds, str):
-                if '/' in odds:  # Formato fracionário (ex: 5/1)
-                    partes = odds.split('/')
-                    return float(partes[0]) / float(partes[1]) + 1
-                else:
-                    return float(odds.replace('$', '').replace(',', ''))
-            return 5.0  # Default
-        except:
-            return 5.0
-    
-    def _detectar_value_bet(self, score_combinado, odds_numericas):
-        """Detecta se é uma value bet (bom score + odds atrativas)"""
-        if score_combinado >= 7.0 and odds_numericas >= 4.0:
-            return True
-        return False
-    
-    def _detectar_dark_horse(self, joquei_score, forma_score, odds_numericas):
-        """Detecta dark horses (potencial oculto)"""
-        if (joquei_score >= 7.0 or forma_score >= 7.0) and odds_numericas >= 8.0:
-            return True
-        return False
-    
-    def _calcular_bonus_outsider(self, odds_numericas):
-        """Calcula bônus para outsiders com potencial"""
-        if odds_numericas >= 10.0:
-            return 2.0
-        elif odds_numericas >= 6.0:
-            return 1.5
-        return 1.0
-    
-    def _classificar_cavalo_v2(self, score_total, odds_numericas, is_value_bet, is_dark_horse):
-        """Classificação melhorada baseada em Southwell"""
-        if is_value_bet:
-            return "🎯 VALUE BET"
-        elif is_dark_horse:
-            return "🌟 DARK HORSE"
-        elif score_total >= 8.5:
-            return "🏆 FAVORITO FORTE"
-        elif score_total >= 7.0:
-            return "⭐ BOM CANDIDATO"
-        elif score_total >= 5.5:
-            return "📊 OPÇÃO MODERADA"
-        else:
-            return "⚠️ RISCO ALTO"
 
 # Instância global do extrator
 extrator = ExtractorCavalos()

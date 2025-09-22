@@ -1236,6 +1236,36 @@
             }
         }
         
+        /* Melhorias para scroll em dispositivos móveis */
+        body.touch-device {
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        
+        /* Prevenir interferência no scroll natural */
+        .touch-device * {
+            touch-action: manipulation;
+        }
+        
+        /* Permitir scroll vertical nos cards e tabelas */
+        .touch-device .horses-mobile-cards,
+        .touch-device .horses-table {
+            touch-action: pan-y;
+        }
+        
+        /* Melhorar performance de scroll */
+        .touch-device .horse-card {
+            will-change: transform;
+        }
+        
+        /* Garantir que o conteúdo principal permita scroll */
+        .touch-device .main-content {
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+        
     </style>
 </head>
 <body>
@@ -2417,56 +2447,52 @@
             });
         }
         
-        // Adicionar suporte a gestos para Android
+        // Suporte melhorado para dispositivos móveis
         let touchStartY = 0;
         let touchEndY = 0;
+        let isScrolling = false;
         
         document.addEventListener('touchstart', function(e) {
             touchStartY = e.changedTouches[0].screenY;
+            isScrolling = false;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(e) {
+            isScrolling = true;
         }, { passive: true });
         
         document.addEventListener('touchend', function(e) {
             touchEndY = e.changedTouches[0].screenY;
-            handleGesture();
+            
+            // Só processar gestos se não estiver fazendo scroll
+            if (!isScrolling) {
+                handleGesture();
+            }
         }, { passive: true });
         
         function handleGesture() {
-            const swipeThreshold = 50;
+            const swipeThreshold = 100; // Aumentar threshold para evitar ativação acidental
             const diff = touchStartY - touchEndY;
             
             if (Math.abs(diff) > swipeThreshold) {
-                if (diff > 0) {
-                    // Swipe up - scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    // Swipe down - refresh if at top
-                    if (window.scrollY === 0) {
-                        location.reload();
-                    }
+                // Apenas refresh quando swipe down no topo da página
+                if (diff < 0 && window.scrollY === 0) {
+                    location.reload();
                 }
+                // Remover o scroll automático para o topo no swipe up
             }
         }
         
-        // Otimizações para Android
+        // Otimizações para dispositivos móveis
         document.addEventListener('DOMContentLoaded', function() {
-            // Prevenir zoom duplo toque
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-                const now = (new Date()).getTime();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-            
-            // Melhorar performance de scroll
-            document.addEventListener('touchmove', function(e) {
-                // Permitir scroll natural
-            }, { passive: true });
-            
             // Adicionar classe para Android
             if (/Android/i.test(navigator.userAgent)) {
                 document.body.classList.add('android-device');
+            }
+            
+            // Melhorar performance de scroll em dispositivos móveis
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
             }
         });
     </script>

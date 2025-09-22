@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🏇 Cavalos Pro - Sistema Híbrido</title>
+    
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#16213e"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cavalos Pro">
+    <meta name="description" content="Análise híbrida inteligente de corridas de cavalos com IA">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Cavalos Pro">
+    
+    <!-- Android PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-title" content="Cavalos Pro">
+    
+    <!-- Icons -->
+    <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/static/icons/icon-512.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+    
+    <!-- Load fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .url-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .analyze-btn {
+            padding: 18px 35px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            scale: 1.05;
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .examples {
+            margin-top: 20px;
+        }
+
+        .examples h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .example-urls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .example-url {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .example-url:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #bee5eb;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .horses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 12px;
+        }
+
+        .horses-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .horses-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 10px;
+        }
+
+        .horses-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .position {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .horse-name {
+            font-weight: bold;
+            color: #495057;
+            font-size: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            min-width: 140px;
+            max-width: 200px;
+        }
+
+        .recommendation {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .rec-favorito {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .rec-boa {
+            background: #28a745;
+            color: #000000;
+        }
+
+        .rec-consideravel {
+            background: #ffc107;
+            color: #000000;
+        }
+
+        .rec-risco {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .rec-evitar {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Estilos para Probabilidade de Vitória */
+        .probabilidade {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .prob-alta {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .prob-media {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .prob-baixa {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estilos para Momentum */
+        .momentum {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .momentum-alto {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .momentum-medio {
+            background: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+
+        .momentum-baixo {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estilos para Percentil */
+        .percentil {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .percentil-alto {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .percentil-medio {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .percentil-baixo {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estilos para Grupo de Performance */
+        .grupo-performance {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            min-width: 60px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Estilo específico para Top 3 quando fora do dashboard */
+        .chart-container[style*="margin-top: 30px"] {
+            width: 100%;
+            max-width: none;
+            margin: 30px 0 !important;
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            height: 200px;
+            border-bottom: 2px solid #dee2e6;
+            margin: 20px 0;
+        }
+
+        .score-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 5px 5px 0 0;
+            min-width: 30px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .score-bar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .score-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+
+        .jockey-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .jockey-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .jockey-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .jockey-count {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .recommendations-chart {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .rec-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .rec-favorito { background: #28a745; }
+        .rec-boa { background: #007bff; }
+        .rec-consideravel { background: #ffc107; color: #212529; }
+        .rec-risco { background: #fd7e14; }
+        .rec-evitar { background: #dc3545; }
+
+        .rec-count {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .rec-text {
+            font-size: 0.9em;
+        }
+
+        .top3-horses {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: none;
+        }
+
+        .top-horse-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .top-horse-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .top-horse-item:first-child {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: 2px solid #FFD700;
+        }
+
+        .top-horse-item:nth-child(2) {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+        }
+
+        .top-horse-item:nth-child(3) {
+            background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
+        }
+
+        .horse-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            min-height: 60px;
+            flex-wrap: nowrap;
+        }
+
+        .horse-position {
+            font-size: 2.2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            width: 60px;
+        }
+
+        .horse-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+            min-width: 0;
+            word-wrap: break-word;
+        }
+
+        .horse-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .horse-info {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+        }
+
+        .info-label {
+            opacity: 0.8;
+            font-weight: 500;
+            margin-right: 4px;
+        }
+
+        .info-value {
+            font-weight: bold;
+        }
+
+        .horse-score {
+            text-align: center;
+            padding: 8px 12px;
+            flex-shrink: 0;
+        }
+        
+        .horse-score strong {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            border: 2px solid #4a5bc4;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+        }
+
+
+
+        .horse-recommendation {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .worst-horses {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: none;
+        }
+
+        .worst-horse-item {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: 10px;
+            padding: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .worst-horse-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .worst-horse-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .worst-horse-position {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffebee;
+        }
+
+        .worst-horse-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+
+        .worst-horse-score {
+            text-align: right;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            min-width: 50px;
+        }
+
+        .worst-score-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            line-height: 1;
+        }
+
+        .worst-score-label {
+            font-size: 0.6em;
+            opacity: 0.8;
+            margin-top: 1px;
+        }
+
+        .worst-horse-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .worst-horse-info {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+
+        .worst-info-label {
+            opacity: 0.8;
+            font-weight: 500;
+            margin-right: 3px;
+        }
+
+        .worst-info-value {
+            font-weight: bold;
+        }
+
+        .worst-horse-warning {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #ffebee;
+        }
+
+        .worst-horse-item.worst-of-all {
+            background: linear-gradient(135deg, #8b0000 0%, #660000 100%);
+            border-left: 4px solid #ff0000;
+            box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4);
+            animation: pulse-warning 2s infinite;
+        }
+
+        .worst-horse-item.worst-of-all .worst-horse-warning {
+            background: rgba(255, 0, 0, 0.3);
+            color: #fff;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        @keyframes pulse-warning {
+            0% { box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4); }
+            50% { box-shadow: 0 6px 25px rgba(255, 0, 0, 0.6); }
+            100% { box-shadow: 0 4px 20px rgba(139, 0, 0, 0.4); }
+        }
+        
+        .export-btn-text {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .export-btn {
+            padding: 12px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .url-section {
+                padding: 20px;
+            }
+            
+            .url-input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .url-input {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+            
+            .analyze-btn {
+                padding: 15px 25px;
+                font-size: 16px;
+                min-width: 100%;
+            }
+            
+            .example-urls {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .chart-container {
+                padding: 15px;
+            }
+            
+            .score-chart {
+                height: 150px;
+            }
+            
+            .score-bar {
+                min-width: 25px;
+            }
+            
+            .top3-horses {
+                gap: 10px;
+            }
+            
+            .top-horse-item {
+                padding: 12px;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .export-btn {
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .horses-table {
+                font-size: 10px;
+                table-layout: auto;
+                overflow-x: auto;
+                display: block;
+                white-space: nowrap;
+            }
+            
+            .horses-table thead,
+            .horses-table tbody,
+            .horses-table tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+            
+            .horses-table th,
+            .horses-table td {
+                padding: 6px 3px;
+                white-space: normal;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                font-size: 9px;
+            }
+            
+            .horses-table th:nth-child(2),
+            .horses-table td:nth-child(2) {
+                width: 25%;
+                min-width: 120px;
+            }
+            
+            .position {
+                min-width: 30px;
+            }
+            
+            .horse-name {
+                min-width: 130px;
+                font-size: 9px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                max-width: 180px;
+            }
+            
+            .horse-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .horse-name {
+                font-size: 1.1em;
+                margin: 0;
+            }
+            
+            .horse-details {
+                 grid-template-columns: 1fr;
+                 gap: 6px;
+             }
+            
+            .horse-info {
+                font-size: 0.8em;
+                padding: 3px 6px;
+            }
+            
+            .score-value {
+                font-size: 1.5em;
+            }
+            
+            .horse-position {
+                font-size: 1.8em;
+            }
+            
+            .score-label {
+                font-size: 0.7em;
+            }
+            
+            .jockey-stats {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .recommendations-chart {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+            
+            .worst-horses {
+                gap: 8px;
+                width: 100%;
+                max-width: none;
+            }
+            
+            .worst-horse-item {
+                padding: 10px;
+            }
+            
+            .worst-horse-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .worst-horse-name {
+                font-size: 1em;
+                margin: 0;
+            }
+            
+            .worst-horse-details {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            
+            .worst-horse-info {
+                font-size: 0.7em;
+                padding: 2px 4px;
+            }
+            
+            .worst-horse-position {
+                font-size: 1.3em;
+            }
+        }
+            
+            .horses-table {
+                font-size: 14px;
+            }
+            
+            .horses-table th,
+            .horses-table td {
+                padding: 10px 8px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        
+        /* Regras específicas para telas muito pequenas (Android) */
+        @media (max-width: 480px) {
+            .horses-table {
+                display: table;
+                width: 100%;
+                table-layout: auto;
+                overflow-x: auto;
+                font-size: 10px;
+            }
+            
+            .horses-table th,
+            .horses-table td {
+                padding: 6px 3px;
+                font-size: 10px;
+                vertical-align: top;
+            }
+            
+            .horses-table th:nth-child(2),
+            .horses-table td:nth-child(2) {
+                width: auto;
+                min-width: 100px;
+                max-width: 150px;
+                word-break: break-word;
+                hyphens: auto;
+            }
+            
+            .horse-name {
+                font-size: 10px;
+                line-height: 1.2;
+                word-break: break-word;
+                hyphens: auto;
+                overflow-wrap: anywhere;
+            }
+            
+            .position {
+                min-width: 25px;
+                font-size: 10px;
+            }
+            
+            .recommendation {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+            
+            /* Top 3 cavalos empilhados verticalmente */
+            .top3-horses {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+                max-width: none;
+            }
+            
+            .top-horse-item {
+                width: 100%;
+                margin: 0;
+                padding: 15px;
+            }
+            
+            .horse-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                flex-wrap: nowrap;
+            }
+            
+            .horse-position {
+                font-size: 1.8em;
+                width: 50px;
+                flex-shrink: 0;
+            }
+            
+            .horse-name {
+                font-size: 1em;
+                flex: 1;
+                margin: 0 8px;
+                text-align: center;
+                word-break: break-word;
+                line-height: 1.2;
+            }
+            
+            .horse-score {
+                flex-shrink: 0;
+                width: 60px;
+            }
+            
+            .horse-score strong {
+                font-size: 1em;
+                padding: 3px 6px;
+            }
+            
+            .horse-details {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-top: 10px;
+            }
+            
+            .horse-info {
+                font-size: 0.75em;
+                padding: 3px 6px;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐎 Analisador de Cavalos Por Kleber Jean</h1>
+            <p>Extraia e analise dados de corridas de cavalos </p>
+        </div>
+
+        <div class="main-content">
+            <div class="url-section">
+                <h2>📋 Cole a URL da Corrida</h2>
+                <p style="color: #28a745; font-weight: bold; margin-bottom: 15px; font-size: 16px;">✅ URL de exemplo já carregada - Clique em "ANALISAR AGORA" para ver os resultados!</p>
+                <div class="url-input-group">
+                    <input type="url" id="urlInput" class="url-input" 
+                           placeholder="Cole aqui a URL da corrida ou use o exemplo abaixo" 
+                           value="https://www.racingpost.com/racecards/192/naas/2025-08-04/900959?authme"
+                           autocomplete="off">
+                    <button id="analyzeBtn" class="analyze-btn">🔍 Analisar Agora</button>
+                </div>
+                
+                <div class="examples">
+                    <h3>💡 Sites Suportados:</h3>
+                    <div class="example-urls">
+                        <div class="example-url" onclick="setExampleUrl('https://www.racingpost.com/')">
+                            🏇 Racing Post - racingpost.com
+                        </div>
+                        <div class="example-url" onclick="setExampleUrl('https://www.timeform.com/')">
+                            📊 Timeform - timeform.com
+                        </div>
+                        <div class="example-url" onclick="setExampleUrl('https://www.attheraces.com/')">
+                            🎯 At The Races - attheraces.com
+                        </div>
+                        <div class="example-url" onclick="setExampleUrl('https://www.racing.com/')">
+                            🏆 Racing.com - racing.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <h3>🔍 Extraindo e analisando dados...</h3>
+                <p>Isso pode levar alguns segundos</p>
+            </div>
+
+            <div id="results" class="results">
+                <div id="statsSection"></div>
+                
+                <h2>📊 Dashboard de Análise</h2>
+                <button id="showDashboardBtn" onclick="forceShowDashboard()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-bottom: 15px; cursor: pointer;">📊 Mostrar Dashboard</button>
+                
+                <div class="dashboard" style="display: grid !important; visibility: visible !important; opacity: 1 !important;">
+                    <div class="chart-container">
+                        <div class="chart-title">📊 Scores dos Top 10</div>
+                        <div id="scoreChart" class="score-chart"></div>
+                    </div>
+                </div>
+                
+                <div id="horsesSection"></div>
+                
+                <div class="chart-container" style="margin-top: 30px;">
+                    <div class="chart-title">🏆 Top 3 Melhores Cavalos</div>
+                    <div id="top3Horses" class="top3-horses"></div>
+                </div>
+                
+                <div class="chart-container" style="margin-top: 30px;">
+                    <div class="chart-title">⚠️ Cavalos Para LAY</div>
+                    <div id="worstHorses" class="worst-horses"></div>
+                </div>
+                
+                <div class="chart-container" style="margin-top: 30px;">
+                    <div class="chart-title">🏇 Jóqueis Mais Frequentes</div>
+                    <div id="jockeyStats" class="jockey-stats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeUrl);
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeUrl();
+            }
+        });
+
+        function setExampleUrl(url) {
+            document.getElementById('urlInput').value = url;
+        }
+
+        async function analyzeUrl() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showError('Por favor, insira uma URL válida');
+                return;
+            }
+
+            // Validar URL
+            try {
+                new URL(url);
+            } catch {
+                showError('URL inválida. Verifique o formato.');
+                return;
+            }
+
+            showLoading();
+            hideResults();
+            hideError();
+
+            try {
+                const response = await fetch('/analisar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    body: JSON.stringify({ 
+                        url: url,
+                        timestamp: Date.now()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.erro || !data.sucesso) {
+                    showError(data.erro || 'Erro na análise');
+                    return;
+                }
+
+                // Extrair dados do resultado
+                const resultado = data.resultado || data;
+                
+                // Adaptação da estrutura de dados
+                if (resultado.dados && resultado.dados.analises) {
+                    resultado.analises = resultado.dados.analises;
+                }
+                
+                currentData = resultado;
+                showResults(resultado);
+                showSuccess('Análise concluída com sucesso!');
+
+            } catch (error) {
+                showError('Erro ao conectar com o servidor: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showResults(data) {
+            console.log('=== showResults DEBUG ===');
+            console.log('Full data received:', data);
+            console.log('data.analises:', data.analises);
+            console.log('data.estatisticas:', data.estatisticas);
+            console.log('Type of data.analises:', typeof data.analises);
+            console.log('Is data.analises array?', Array.isArray(data.analises));
+            console.log('Length of data.analises:', data.analises ? data.analises.length : 'undefined');
+            
+            if (data.analises && data.analises.length > 0) {
+                console.log('First horse sample:', data.analises[0]);
+            }
+            
+            // Forçar visibilidade do dashboard
+            const dashboardElement = document.querySelector('.dashboard');
+            console.log('Dashboard element found:', !!dashboardElement);
+            if (dashboardElement) {
+                dashboardElement.style.display = 'grid';
+                dashboardElement.style.visibility = 'visible';
+                dashboardElement.style.opacity = '1';
+                console.log('Dashboard visibility forced');
+            }
+            
+            // Mostrar resultados
+            const resultsElement = document.getElementById('results');
+            console.log('Results element found:', !!resultsElement);
+            if (resultsElement) {
+                resultsElement.style.display = 'block';
+                console.log('Results section made visible');
+            }
+            
+            // Processar dados
+            console.log('=== CALLING FUNCTIONS ===');
+            showStats(data.estatisticas);
+            console.log('showStats completed');
+            showDashboard(data.analises);
+            console.log('showDashboard completed');
+            console.log('About to call showHorses with:', data.analises);
+            showHorses(data.analises);
+            console.log('showHorses completed');
+            
+            // Garantir que as seções específicas sejam atualizadas
+            if (data.analises && Array.isArray(data.analises) && data.analises.length > 0) {
+                // Aguardar um pouco para garantir que o DOM esteja pronto
+                setTimeout(() => {
+                    showTop3Horses(data.analises);
+                    showWorstHorses(data.analises);
+                }, 100);
+            }
+            
+            // Mostrar botão do dashboard
+            const dashboardBtn = document.getElementById('showDashboardBtn');
+            if (dashboardBtn) {
+                dashboardBtn.style.display = 'inline-block';
+                console.log('Dashboard button made visible');
+            }
+        }
+
+        function showStats(stats) {
+            const statsHtml = `
+                <h2>📊 Estatísticas da Corrida</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.total_cavalos}</div>
+                        <div class="stat-label">Cavalos Analisados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.score_medio}</div>
+                        <div class="stat-label">Score Médio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.melhor_score}</div>
+                        <div class="stat-label">Melhor Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.favorito}</div>
+                        <div class="stat-label">Favorito</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('statsSection').innerHTML = statsHtml;
+        }
+
+        function showHorses(horses) {
+            console.log('=== showHorses DEBUG ===');
+            console.log('showHorses called with:', horses);
+            console.log('horses type:', typeof horses);
+            console.log('horses is array:', Array.isArray(horses));
+            console.log('horses length:', horses ? horses.length : 'undefined');
+            
+            if (!horses || !Array.isArray(horses) || horses.length === 0) {
+                console.error('No horses data provided to showHorses');
+                document.getElementById('horsesSection').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado de cavalos disponível</p>';
+                return;
+            }
+            
+            let horsesHtml = `
+                <h2>🏇 Ranking dos Cavalos - Análise Comparativa</h2>
+                <table class="horses-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Cavalo</th>
+                            <th>Grupo</th>
+                            <th>Jóquei</th>
+                            <th>Official Rating</th>
+                            <th>Score Final</th>
+                            <th>Percentil</th>
+                            <th>Prob. Vitória</th>
+                            <th>Momentum</th>
+                            <th>Recomendação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            horses.forEach((horse, index) => {
+                const recClass = getRecommendationClass(horse.recomendacao);
+                
+                // Formatação da probabilidade de vitória
+                let probabilidadeFormatada = 'N/A';
+                if (horse.probabilidade_vitoria !== undefined && horse.probabilidade_vitoria !== null) {
+                    probabilidadeFormatada = Math.round(parseFloat(horse.probabilidade_vitoria)) + '%';
+                }
+                
+                // Formatação do momentum
+                let momentumFormatado = 'N/A';
+                if (horse.momentum !== undefined && horse.momentum !== null) {
+                    momentumFormatado = parseFloat(horse.momentum).toFixed(1);
+                }
+                
+                // Formatação do Official Rating
+                let officialRatingFormatado = 'N/A';
+                if (horse.official_rating !== undefined && horse.official_rating !== null && horse.official_rating !== '' && horse.official_rating !== 'N/A') {
+                    // Garantir que o OR seja exibido como string completa
+                    officialRatingFormatado = String(horse.official_rating);
+                } else if (horse.or !== undefined && horse.or !== null && horse.or !== '') {
+                    officialRatingFormatado = String(horse.or);
+                }
+                
+                // Classes CSS para probabilidade
+                let probClass = '';
+                if (probabilidadeFormatada !== 'N/A') {
+                    const probValue = parseFloat(probabilidadeFormatada);
+                    if (probValue >= 75) probClass = 'prob-alta';
+                    else if (probValue >= 55) probClass = 'prob-media';
+                    else probClass = 'prob-baixa';
+                }
+                
+                // Classes CSS para momentum
+                let momentumClass = '';
+                if (momentumFormatado !== 'N/A') {
+                    const momentumValue = parseFloat(momentumFormatado);
+                    if (momentumValue >= 70) momentumClass = 'momentum-alto';
+                    else if (momentumValue >= 50) momentumClass = 'momentum-medio';
+                    else momentumClass = 'momentum-baixo';
+                }
+                
+                // Formatação do score final ajustado
+                let scoreFinalFormatado = 'N/A';
+                if (horse.pontuacao_final_ajustada !== undefined && horse.pontuacao_final_ajustada !== null) {
+                    scoreFinalFormatado = parseFloat(horse.pontuacao_final_ajustada).toFixed(2);
+                } else if (horse.pontuacao_final !== undefined && horse.pontuacao_final !== null) {
+                    scoreFinalFormatado = parseFloat(horse.pontuacao_final).toFixed(2);
+                } else if (horse.score_total !== undefined && horse.score_total !== null) {
+                    scoreFinalFormatado = (parseFloat(horse.score_total) / 10).toFixed(2);
+                }
+                
+                // Formatação do percentil
+                let percentilFormatado = 'N/A';
+                if (horse.percentil !== undefined && horse.percentil !== null) {
+                    percentilFormatado = Math.round(parseFloat(horse.percentil)) + '%';
+                }
+                
+                // Formatação do grupo de performance
+                let grupoPerformance = horse.grupo_performance || '📊 Médio';
+                let corGrupo = horse.cor_grupo || '#CD7F32';
+                
+                // Classe CSS para o percentil
+                let percentilClass = '';
+                if (percentilFormatado !== 'N/A') {
+                    const percentilValue = parseFloat(percentilFormatado);
+                    if (percentilValue >= 80) percentilClass = 'percentil-alto';
+                    else if (percentilValue >= 60) percentilClass = 'percentil-medio';
+                    else percentilClass = 'percentil-baixo';
+                }
+                
+                horsesHtml += `
+                    <tr>
+                        <td class="position">${horse.posicao_final || index + 1}</td>
+                        <td class="horse-name">${horse.nome || 'N/A'}</td>
+                        <td><span class="grupo-performance" style="color: ${corGrupo}; font-weight: bold;">${grupoPerformance}</span></td>
+                        <td>${horse.joquei || 'N/A'}</td>
+                        <td><strong>${officialRatingFormatado}</strong></td>
+                        <td><strong>${scoreFinalFormatado}</strong></td>
+                        <td><span class="percentil ${percentilClass}">${percentilFormatado}</span></td>
+                        <td><span class="probabilidade ${probClass}">${probabilidadeFormatada}</span></td>
+                        <td><span class="momentum ${momentumClass}">${momentumFormatado}</span></td>
+                        <td><span class="recommendation ${recClass}">${horse.recomendacao}</span></td>
+                    </tr>
+                `;
+            });
+
+            horsesHtml += `
+                    </tbody>
+                </table>
+                
+                <div class="export-buttons">
+                    <div class="export-btn-text">📥 Exportar Dados</div>
+                    <button class="export-btn" onclick="exportData('excel')">📊 Excel (.xlsx)</button>
+                    <button class="export-btn" onclick="exportData('csv')">📄 CSV</button>
+                    <button class="export-btn" onclick="exportData('json')">📋 JSON</button>
+                </div>
+            `;
+
+            document.getElementById('horsesSection').innerHTML = horsesHtml;
+            console.log('horsesSection updated with HTML including export buttons');
+            console.log('Export buttons should now be visible');
+        }
+
+        function showDashboard(horses) {
+            console.log('showDashboard called with:', horses);
+            console.log('Type of horses:', typeof horses);
+            console.log('Is array:', Array.isArray(horses));
+            
+            if (!horses || !Array.isArray(horses) || horses.length === 0) {
+                console.error('No valid horses data provided to dashboard');
+                // Mostrar mensagem de erro nos containers
+                document.getElementById('scoreChart').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                document.getElementById('jockeyStats').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                document.getElementById('worstHorses').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                document.getElementById('top3Horses').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                return;
+            }
+            
+            console.log('Processing', horses.length, 'horses for dashboard');
+            showScoreChart(horses.slice(0, 10));
+            showJockeyStats(horses);
+            showWorstHorses(horses);
+            showTop3Horses(horses);
+        }
+
+        function showScoreChart(topHorses) {
+            console.log('=== showScoreChart DEBUG ===');
+            console.log('topHorses received:', topHorses);
+            console.log('topHorses type:', typeof topHorses);
+            console.log('topHorses is array:', Array.isArray(topHorses));
+            
+            const scoreChartElement = document.getElementById('scoreChart');
+            console.log('scoreChart element found:', !!scoreChartElement);
+            
+            if (!topHorses || topHorses.length === 0) {
+                console.error('No horses data for score chart');
+                if (scoreChartElement) {
+                    scoreChartElement.innerHTML = '<p style="text-align: center; padding: 20px; color: #999;">Nenhum dado disponível para o gráfico</p>';
+                }
+                return;
+            }
+            
+            try {
+                const maxScore = Math.max(...topHorses.map(h => h.score_total || 0));
+                console.log('Max score calculated:', maxScore);
+                
+                let chartHtml = '';
+                
+                // Criar gráfico de barras 3D
+                const colors = [
+                    '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe',
+                    '#43e97b', '#fa709a', '#fee140', '#a8edea', '#d299c2'
+                ];
+                
+                let barsHtml = '';
+                
+                topHorses.forEach((horse, index) => {
+                    const score = horse.score_total || 0;
+                    const horseName = horse.nome || `Cavalo ${index + 1}`;
+                    const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                    const color = colors[index % colors.length];
+                    const barHeight = Math.max(percentage * 2, 20); // Altura mínima de 20px
+                    
+                    console.log(`Processing horse ${index}: ${horseName}, score: ${score}, percentage: ${percentage.toFixed(1)}%`);
+                    
+                    barsHtml += `
+                         <div style="
+                             display: flex;
+                             align-items: flex-end;
+                             margin: 0 3px;
+                             flex-direction: column;
+                             min-width: 50px;
+                         ">
+                             <div style="
+                                 writing-mode: vertical-rl;
+                                 text-orientation: mixed;
+                                 font-size: 9px;
+                                 font-weight: bold;
+                                 color: #333;
+                                 margin-bottom: 5px;
+                                 max-width: 50px;
+                                 text-align: center;
+                                 word-break: break-word;
+                                 height: 40px;
+                                 display: flex;
+                                 align-items: center;
+                                 justify-content: center;
+                             ">${horseName}</div>
+                             
+                             <div style="
+                                 position: relative;
+                                 width: 40px;
+                                 height: ${Math.max(barHeight * 0.6, 15)}px;
+                                 background: linear-gradient(45deg, ${color}, ${color}dd);
+                                 border-radius: 3px 3px 0 0;
+                                 box-shadow: 
+                                     0 0 0 1px rgba(255,255,255,0.3),
+                                     2px 2px 4px rgba(0,0,0,0.3),
+                                     inset -1px -1px 2px rgba(0,0,0,0.2),
+                                     inset 1px 1px 2px rgba(255,255,255,0.3);
+                                 transform: perspective(80px) rotateX(5deg);
+                                 transition: all 0.3s ease;
+                                 cursor: pointer;
+                             "
+                             onmouseover="this.style.transform='perspective(80px) rotateX(5deg) scale(1.05)'; this.style.boxShadow='0 0 0 1px rgba(255,255,255,0.5), 3px 3px 6px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.4)'"
+                             onmouseout="this.style.transform='perspective(80px) rotateX(5deg) scale(1)'; this.style.boxShadow='0 0 0 1px rgba(255,255,255,0.3), 2px 2px 4px rgba(0,0,0,0.3), inset -1px -1px 2px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.3)'"
+                             title="${horseName}: ${score} pontos">
+                                 
+                                 <!-- Topo da barra 3D -->
+                                 <div style="
+                                     position: absolute;
+                                     top: -2px;
+                                     left: -2px;
+                                     width: 40px;
+                                     height: 4px;
+                                     background: linear-gradient(135deg, ${color}ff, ${color}aa);
+                                     border-radius: 3px;
+                                     transform: perspective(40px) rotateX(45deg);
+                                 "></div>
+                                 
+                                 <!-- Lateral direita da barra 3D -->
+                                 <div style="
+                                     position: absolute;
+                                     top: -2px;
+                                     right: -4px;
+                                     width: 4px;
+                                     height: ${Math.max(barHeight * 0.6, 15) + 2}px;
+                                     background: linear-gradient(180deg, ${color}cc, ${color}88);
+                                     transform: perspective(40px) rotateY(45deg);
+                                 "></div>
+                             </div>
+                             
+                             <div style="
+                                 font-size: 10px;
+                                 font-weight: bold;
+                                 color: ${color};
+                                 text-align: center;
+                                 margin-top: 5px;
+                                 background: rgba(255,255,255,0.9);
+                                 padding: 2px 4px;
+                                 border-radius: 8px;
+                                 box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                             ">${score}</div>
+                         </div>
+                     `;
+                });
+                
+                chartHtml = `
+                     <div style="
+                         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                         padding: 15px;
+                         border-radius: 8px;
+                         box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                         overflow-x: auto;
+                     ">
+                         <h4 style="
+                             margin: 0 0 15px 0;
+                             color: #333;
+                             font-size: 16px;
+                             text-align: center;
+                             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                         ">🏆 Scores dos Top ${topHorses.length} Cavalos</h4>
+                         
+                         <div style="
+                             display: flex;
+                             align-items: flex-end;
+                             justify-content: center;
+                             min-height: 180px;
+                             padding: 10px 0;
+                             gap: 2px;
+                             flex-wrap: nowrap;
+                             overflow-x: auto;
+                         ">
+                             ${barsHtml}
+                         </div>
+                         
+                         <div style="
+                             text-align: center;
+                             margin-top: 10px;
+                             font-size: 11px;
+                             color: #666;
+                             font-style: italic;
+                         ">💡 Passe o mouse sobre as barras para ver detalhes</div>
+                     </div>
+                 `;
+                
+                console.log('Generated chart HTML length:', chartHtml.length);
+                console.log('Chart HTML preview:', chartHtml.substring(0, 200) + '...');
+                
+                if (scoreChartElement) {
+                    scoreChartElement.innerHTML = chartHtml;
+                    console.log('Chart HTML successfully set to element');
+                } else {
+                    console.error('scoreChart element not found!');
+                }
+                
+            } catch (error) {
+                console.error('Error in showScoreChart:', error);
+                if (scoreChartElement) {
+                    scoreChartElement.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Erro ao gerar gráfico</p>';
+                }
+            }
+        }
+
+        function showJockeyStats(horses) {
+            const jockeyCount = {};
+            horses.forEach(horse => {
+                const jockey = horse.joquei || 'Desconhecido';
+                jockeyCount[jockey] = (jockeyCount[jockey] || 0) + 1;
+            });
+            
+            const sortedJockeys = Object.entries(jockeyCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6);
+            
+            let jockeyHtml = '';
+            sortedJockeys.forEach(([jockey, count]) => {
+                jockeyHtml += `
+                    <div class="jockey-item">
+                        <div class="jockey-name">${jockey}</div>
+                        <div class="jockey-count">${count}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('jockeyStats').innerHTML = jockeyHtml;
+        }
+
+        function showWorstHorses(horses) {
+            const worstElement = document.getElementById('worstHorses');
+            
+            if (!horses || !Array.isArray(horses) || horses.length === 0) {
+                worstElement.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                return;
+            }
+            
+            // Ordenar cavalos por pontuação final (menor pontuação = pior cavalo)
+            const sortedHorses = [...horses].sort((a, b) => {
+                const scoreA = a.pontuacao_final || a.score_total || 0;
+                const scoreB = b.pontuacao_final || b.score_total || 0;
+                return scoreA - scoreB; // Ordem crescente para pegar os piores
+            });
+            
+            const worst3 = sortedHorses.slice(0, 3);
+            
+            let worstHtml = '';
+            worst3.forEach((horse, index) => {
+                const position = index + 1;
+                const isWorstOfAll = position === 1; // O primeiro é o pior de todos
+                const horseName = horse.nome || 'Nome não disponível';
+                const score = (horse.pontuacao_final || horse.score_total || 0).toFixed(1);
+                const jockey = horse.joquei || 'N/A';
+                const age = horse.idade || 'N/A';
+                const weight = horse.peso || 'N/A';
+                const form = horse.forma || 'N/A';
+                
+                const extraClass = isWorstOfAll ? ' worst-of-all' : '';
+                const warningIcon = isWorstOfAll ? '🚨' : '⚠️';
+                const warningText = isWorstOfAll ? 'PIOR DE TODOS - FORTE LAY' : 'RECOMENDADO PARA LAY';
+                
+                worstHtml += `
+                    <div class="worst-horse-item${extraClass}">
+                        <div class="worst-horse-header">
+                            <div class="worst-horse-position">${position}º ${isWorstOfAll ? '🚨' : ''}</div>
+                            <div class="worst-horse-name">${horseName}</div>
+                            <div class="worst-horse-score">
+                                <div class="worst-score-value">${score}</div>
+                                <div class="worst-score-label">pts</div>
+                            </div>
+                        </div>
+                        <div class="worst-horse-details">
+                            <div class="worst-horse-info">
+                                <span class="worst-info-label">Jóquei:</span>
+                                <span class="worst-info-value">${jockey}</span>
+                            </div>
+                            <div class="worst-horse-info">
+                                <span class="worst-info-label">Idade:</span>
+                                <span class="worst-info-value">${age}</span>
+                            </div>
+                            <div class="worst-horse-info">
+                                <span class="worst-info-label">Peso:</span>
+                                <span class="worst-info-value">${weight}</span>
+                            </div>
+                            <div class="worst-horse-info">
+                                <span class="worst-info-label">Forma:</span>
+                                <span class="worst-info-value">${form}</span>
+                            </div>
+                        </div>
+                        <div class="worst-horse-warning">
+                            ${warningIcon} ${warningText}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            worstElement.innerHTML = worstHtml;
+        }
+
+        function showTop3Horses(horses) {
+            const top3Element = document.getElementById('top3Horses');
+            
+            if (!horses || !Array.isArray(horses) || horses.length === 0) {
+                top3Element.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhum dado disponível</p>';
+                return;
+            }
+            
+            // Ordenar cavalos por pontuação final (melhor primeiro)
+            const sortedHorses = [...horses].sort((a, b) => {
+                const scoreA = a.pontuacao_final || a.score_total || 0;
+                const scoreB = b.pontuacao_final || b.score_total || 0;
+                return scoreB - scoreA;
+            });
+            
+            // Pegar apenas os top 3
+            const top3 = sortedHorses.slice(0, 3);
+            
+            let html = '';
+            
+            top3.forEach((horse, index) => {
+                const position = index + 1;
+                const score = horse.pontuacao_final || horse.score_total || 0;
+                const recommendation = horse.recomendacao || 'Análise incompleta';
+                
+                // Medalhas para as posições
+                const medals = ['🥇', '🥈', '🥉'];
+                const medal = medals[index] || '🏆';
+                
+                html += `
+                    <div class="top-horse-item">
+                        <div class="horse-header">
+                            <div class="horse-position">${medal}</div>
+                            <div class="horse-name">${horse.nome || 'Nome não disponível'}</div>
+                            <div class="horse-score">
+                                <strong>${score.toFixed(1)}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="horse-details">
+                            <div class="horse-info">
+                                <span class="info-label">Jóquei:</span>
+                                <span class="info-value">${horse.joquei || 'N/A'}</span>
+                            </div>
+                            <div class="horse-info">
+                                <span class="info-label">Idade:</span>
+                                <span class="info-value">${horse.idade || 'N/A'}</span>
+                            </div>
+                            <div class="horse-info">
+                                <span class="info-label">Peso:</span>
+                                <span class="info-value">${horse.peso || 'N/A'}</span>
+                            </div>
+                            <div class="horse-info">
+                                <span class="info-label">Forma:</span>
+                                <span class="info-value">${horse.forma || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+
+                        
+                        <div class="horse-recommendation">
+                            ${recommendation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            top3Element.innerHTML = html;
+        }
+
+        function getRecommendationClassFromType(type) {
+            switch(type) {
+                case 'FORTE FAVORITO': return 'rec-favorito';
+                case 'BOA OPÇÃO': return 'rec-boa';
+                case 'CONSIDERÁVEL': return 'rec-consideravel';
+                case 'RISCO MÉDIO': return 'rec-risco';
+                default: return 'rec-evitar';
+            }
+        }
+
+        function getRecommendationClass(rec) {
+            if (rec.includes('FORTE FAVORITO') || rec.includes('⭐ FAVORITO')) return 'rec-favorito';
+            if (rec.includes('APOSTA BOA') || rec.includes('⭐ APOSTA BOA')) return 'rec-boa';
+            if (rec.includes('APOSTA MODERADA') || rec.includes('✅ APOSTA MODERADA')) return 'rec-consideravel';
+            if (rec.includes('APOSTA CAUTELOSA') || rec.includes('⚠️ APOSTA CAUTELOSA')) return 'rec-consideravel';
+            if (rec.includes('RISCO MÉDIO')) return 'rec-risco';
+            return 'rec-evitar';
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = false;
+        }
+
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function showError(message) {
+            hideError();
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<strong>❌ Erro:</strong> ${message}`;
+            document.querySelector('.main-content').insertBefore(errorDiv, document.getElementById('loading'));
+        }
+
+        function showSuccess(message) {
+            hideError();
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.innerHTML = `<strong>✅ Sucesso:</strong> ${message}`;
+            document.querySelector('.main-content').insertBefore(successDiv, document.getElementById('results'));
+            
+            // Remover após 5 segundos
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 5000);
+        }
+
+        function showInfo(message) {
+            hideError();
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'info';
+            infoDiv.innerHTML = `<strong>ℹ️ Info:</strong> ${message}`;
+            document.querySelector('.main-content').insertBefore(infoDiv, document.getElementById('results'));
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                if (infoDiv.parentNode) {
+                    infoDiv.parentNode.removeChild(infoDiv);
+                }
+            }, 3000);
+        }
+
+        function hideError() {
+            const errors = document.querySelectorAll('.error, .success');
+            errors.forEach(error => {
+                if (error.parentNode) {
+                    error.parentNode.removeChild(error);
+                }
+            });
+        }
+
+
+
+        function forceShowDashboard() {
+            console.log('🔄 Forçando exibição do dashboard...');
+            
+            if (!currentData || !currentData.analises) {
+                showError('Nenhum dado de análise disponível. Execute uma análise primeiro.');
+                return;
+            }
+            
+            // Debug detalhado dos dados
+            console.log('=== DADOS COMPLETOS ===');
+            console.log('currentData:', currentData);
+            console.log('currentData.analises:', currentData.analises);
+            console.log('Número de cavalos:', currentData.analises.length);
+            
+            // Verificar estrutura de cada cavalo
+            currentData.analises.forEach((horse, index) => {
+                console.log(`Cavalo ${index + 1}:`, {
+                    nome: horse.nome,
+                    score_total: horse.score_total,
+                    joquei: horse.joquei,
+                    recomendacao: horse.recomendacao,
+                    keys: Object.keys(horse)
+                });
+            });
+            
+            // Forçar visibilidade dos elementos
+            const resultsElement = document.getElementById('results');
+            const dashboardElement = document.querySelector('.dashboard');
+            
+            if (resultsElement) {
+                resultsElement.style.display = 'block';
+                resultsElement.style.visibility = 'visible';
+                resultsElement.style.opacity = '1';
+            }
+            
+            if (dashboardElement) {
+                dashboardElement.style.display = 'grid';
+                dashboardElement.style.visibility = 'visible';
+                dashboardElement.style.opacity = '1';
+            }
+            
+            // Reprocessar dados do dashboard
+            console.log('Reprocessando dashboard com', currentData.analises.length, 'cavalos');
+            showDashboard(currentData.analises);
+            
+            // Mostrar tabela de cavalos com botões de exportação
+            console.log('Chamando showHorses para exibir tabela e botões de exportação');
+            showHorses(currentData.analises);
+            
+            showSuccess('Dashboard atualizado com dados reais!');
+        }
+
+        function exportData(format) {
+            if (!currentData) {
+                showError('Nenhum dado para exportar. Execute uma análise primeiro.');
+                return;
+            }
+
+            if (!currentData.analises || currentData.analises.length === 0) {
+                showError('Nenhum dado de cavalos disponível para exportar.');
+                return;
+            }
+
+            try {
+                if (format === 'excel') {
+                    // Exportação Excel via servidor
+                    showInfo('Gerando arquivo Excel...');
+                    
+                    fetch('/exportar/excel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(currentData)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.blob();
+                        }
+                        throw new Error('Erro na resposta do servidor');
+                    })
+                    .then(blob => {
+                        // Criar URL para o blob
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = `analise_corrida_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.xlsx`;
+                        
+                        // Adicionar ao DOM, clicar e remover
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // Limpar após um pequeno delay
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                        }, 100);
+                        
+                        showSuccess('✅ Arquivo Excel baixado com sucesso!');
+                    })
+                    .catch(error => {
+                        console.error('Erro na exportação Excel:', error);
+                        showError('Erro ao exportar para Excel: ' + error.message);
+                    });
+                    
+                } else if (format === 'json') {
+                    const dataStr = JSON.stringify(currentData, null, 2);
+                    downloadFile(dataStr, 'analise_cavalos.json', 'application/json');
+                    showSuccess('Arquivo JSON baixado com sucesso!');
+                } else if (format === 'csv') {
+                    const csv = convertToCSV(currentData.analises);
+                    downloadFile(csv, 'analise_cavalos.csv', 'text/csv');
+                    showSuccess('Arquivo CSV baixado com sucesso! Abra no Excel.');
+                }
+            } catch (error) {
+                console.error('Erro na exportação:', error);
+                showError('Erro ao exportar dados: ' + error.message);
+            }
+        }
+
+        function convertToCSV(horses) {
+            const headers = ['Posição', 'Nome', 'Jóquei', 'Official Rating (OR)', 'Tendência OR', 'Score Total', 'Prob. Vitória (%)', 'Momentum', 'Tendência Peso', 'Performance Jóquei', 'Consistência', 'Recomendação'];
+            let csv = headers.join(',') + '\n';
+            
+            horses.forEach((horse, index) => {
+                const row = [
+                    index + 1,
+                    `"${horse.nome || 'N/A'}"`,
+                    `"${horse.joquei || 'N/A'}"`,
+                    `"${horse.official_rating || horse.odds || 'N/A'}"`,
+                    horse.tendencia_or || 'N/A',
+                    horse.score_total,
+                    horse.probabilidade_vitoria || 'N/A',
+                    horse.momentum || 'N/A',
+                    horse.tendencia_peso || 'N/A',
+                    horse.performance_joquei || 'N/A',
+                    horse.consistencia || 'N/A',
+                    `"${horse.recomendacao}"`
+                ];
+                csv += row.join(',') + '\n';
+            });
+            
+            return csv;
+        }
+
+        function downloadFile(content, filename, contentType) {
+            try {
+                // Criar o blob com o conteúdo
+                const blob = new Blob([content], { type: contentType + ';charset=utf-8;' });
+                
+                // Verificar se o navegador suporta download
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                    // Internet Explorer
+                    window.navigator.msSaveOrOpenBlob(blob, filename);
+                } else {
+                    // Outros navegadores
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = filename;
+                    a.target = '_blank';
+                    
+                    // Adicionar ao DOM, clicar e remover
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Limpar após um pequeno delay
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Erro no download:', error);
+                throw new Error('Falha ao baixar o arquivo');
+            }
+        }
+        
+        // Função de teste removida - sistema agora usa apenas dados reais da API
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado com sucesso:', registration.scope);
+                        
+                        // Verificar se há atualizações
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nova versão disponível
+                                    if (confirm('Nova versão do app disponível! Deseja atualizar?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            console.log('💾 PWA pode ser instalado');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar botão de instalação personalizado
+            showInstallButton();
+        });
+        
+        function showInstallButton() {
+            // Criar botão de instalação se não existir
+            if (!document.getElementById('install-button')) {
+                const installButton = document.createElement('button');
+                installButton.id = 'install-button';
+                installButton.innerHTML = '📱 Instalar App';
+                installButton.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                    z-index: 1000;
+                    transition: all 0.3s ease;
+                `;
+                
+                installButton.addEventListener('click', function() {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(choiceResult) {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('✅ Usuário aceitou instalar o PWA');
+                            } else {
+                                console.log('❌ Usuário recusou instalar o PWA');
+                            }
+                            deferredPrompt = null;
+                            installButton.remove();
+                        });
+                    }
+                });
+                
+                installButton.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                installButton.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+                
+                document.body.appendChild(installButton);
+            }
+        }
+        
+        // Detectar quando o app foi instalado
+        window.addEventListener('appinstalled', function(e) {
+            console.log('🎉 PWA foi instalado com sucesso!');
+            const installButton = document.getElementById('install-button');
+            if (installButton) {
+                installButton.remove();
+            }
+        });
+        
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado com sucesso:', registration.scope);
+                        
+                        // Verificar atualizações
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            console.log('🔄 Nova versão do Service Worker encontrada');
+                            
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nova versão disponível
+                                    if (confirm('Nova versão disponível! Deseja atualizar?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Adicionar suporte a gestos para Android
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndY = e.changedTouches[0].screenY;
+            handleGesture();
+        }, { passive: true });
+        
+        function handleGesture() {
+            const swipeThreshold = 50;
+            const diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe up - scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Swipe down - refresh if at top
+                    if (window.scrollY === 0) {
+                        location.reload();
+                    }
+                }
+            }
+        }
+        
+        // Otimizações para Android
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevenir zoom duplo toque
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Melhorar performance de scroll
+            document.addEventListener('touchmove', function(e) {
+                // Permitir scroll natural
+            }, { passive: true });
+            
+            // Adicionar classe para Android
+            if (/Android/i.test(navigator.userAgent)) {
+                document.body.classList.add('android-device');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# Este arquivo mantém o diretório cache no repositório
+# Os arquivos .json de cache são ignorados pelo .gitignore

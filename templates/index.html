@@ -1030,49 +1030,151 @@
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
         
+        /* Layout mobile otimizado - Cards ao invés de tabela */
+        @media (max-width: 768px) {
+            .horses-table {
+                display: none; /* Esconder tabela no mobile */
+            }
+            
+            .horses-mobile-cards {
+                display: block;
+                width: 100%;
+                margin-top: 20px;
+            }
+            
+            .horse-card {
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                margin-bottom: 15px;
+                padding: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+            }
+            
+            .horse-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            
+            .horse-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .horse-card-position {
+                background: #007bff;
+                color: white;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 16px;
+            }
+            
+            .horse-card-name {
+                flex: 1;
+                margin: 0 12px;
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+                text-align: center;
+            }
+            
+            .horse-card-score {
+                background: #28a745;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            
+            .horse-card-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            
+            .horse-card-detail {
+                background: #f8f9fa;
+                padding: 8px 10px;
+                border-radius: 6px;
+                text-align: center;
+            }
+            
+            .horse-card-detail-label {
+                font-size: 11px;
+                color: #666;
+                margin-bottom: 2px;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+            
+            .horse-card-detail-value {
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .horse-card-recommendation {
+                text-align: center;
+                padding: 10px;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            
+            /* Cores para recomendações */
+             .rec-forte-compra, .rec-compra-forte {
+                 background: #d4edda;
+                 color: #155724;
+                 border: 1px solid #c3e6cb;
+             }
+             
+             .rec-compra {
+                 background: #d1ecf1;
+                 color: #0c5460;
+                 border: 1px solid #bee5eb;
+             }
+             
+             .rec-neutro, .rec-hold, .rec-manter {
+                 background: #fff3cd;
+                 color: #856404;
+                 border: 1px solid #ffeaa7;
+             }
+             
+             .rec-venda, .rec-evitar {
+                 background: #f8d7da;
+                 color: #721c24;
+                 border: 1px solid #f5c6cb;
+             }
+             
+             /* Fallback para outras recomendações */
+             .horse-card-recommendation {
+                 background: #e9ecef;
+                 color: #495057;
+                 border: 1px solid #ced4da;
+             }
+        }
+        
+        /* Esconder cards no desktop */
+        @media (min-width: 769px) {
+            .horses-mobile-cards {
+                display: none;
+            }
+        }
+        
         /* Regras específicas para telas muito pequenas (Android) */
         @media (max-width: 480px) {
-            .horses-table {
-                display: table;
-                width: 100%;
-                table-layout: auto;
-                overflow-x: auto;
-                font-size: 10px;
-            }
-            
-            .horses-table th,
-            .horses-table td {
-                padding: 6px 3px;
-                font-size: 10px;
-                vertical-align: top;
-            }
-            
-            .horses-table th:nth-child(2),
-            .horses-table td:nth-child(2) {
-                width: auto;
-                min-width: 100px;
-                max-width: 150px;
-                word-break: break-word;
-                hyphens: auto;
-            }
-            
-            .horse-name {
-                font-size: 10px;
-                line-height: 1.2;
-                word-break: break-word;
-                hyphens: auto;
-                overflow-wrap: anywhere;
-            }
-            
-            .position {
-                min-width: 25px;
-                font-size: 10px;
-            }
-            
-            .recommendation {
-                font-size: 8px;
-                padding: 3px 6px;
-            }
             
             /* Top 3 cavalos empilhados verticalmente */
             .top3-horses {
@@ -1385,6 +1487,8 @@
             
             let horsesHtml = `
                 <h2>🏇 Ranking dos Cavalos - Análise Comparativa</h2>
+                
+                <!-- Tabela para Desktop -->
                 <table class="horses-table">
                     <thead>
                         <tr>
@@ -1401,6 +1505,11 @@
                         </tr>
                     </thead>
                     <tbody>
+            `;
+            
+            let mobileCardsHtml = `
+                <!-- Cards para Mobile -->
+                <div class="horses-mobile-cards">
             `;
 
             horses.forEach((horse, index) => {
@@ -1474,6 +1583,7 @@
                     else percentilClass = 'percentil-baixo';
                 }
                 
+                // Linha da tabela desktop
                 horsesHtml += `
                     <tr>
                         <td class="position">${horse.posicao_final || index + 1}</td>
@@ -1488,21 +1598,65 @@
                         <td><span class="recommendation ${recClass}">${horse.recomendacao}</span></td>
                     </tr>
                 `;
+                
+                // Card mobile
+                const recMobileClass = horse.recomendacao ? horse.recomendacao.toLowerCase().replace(/[^a-z]/g, '-') : 'neutro';
+                mobileCardsHtml += `
+                    <div class="horse-card">
+                        <div class="horse-card-header">
+                            <div class="horse-card-position">${horse.posicao_final || index + 1}</div>
+                            <div class="horse-card-name">${horse.nome || 'N/A'}</div>
+                            <div class="horse-card-score">${scoreFinalFormatado}</div>
+                        </div>
+                        
+                        <div class="horse-card-details">
+                            <div class="horse-card-detail">
+                                <div class="horse-card-detail-label">Jóquei</div>
+                                <div class="horse-card-detail-value">${horse.joquei || 'N/A'}</div>
+                            </div>
+                            <div class="horse-card-detail">
+                                <div class="horse-card-detail-label">Rating</div>
+                                <div class="horse-card-detail-value">${officialRatingFormatado}</div>
+                            </div>
+                            <div class="horse-card-detail">
+                                <div class="horse-card-detail-label">Percentil</div>
+                                <div class="horse-card-detail-value">${percentilFormatado}</div>
+                            </div>
+                            <div class="horse-card-detail">
+                                <div class="horse-card-detail-label">Prob. Vitória</div>
+                                <div class="horse-card-detail-value">${probabilidadeFormatada}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="horse-card-recommendation rec-${recMobileClass}">
+                            ${horse.recomendacao || 'Neutro'}
+                        </div>
+                    </div>
+                `;
             });
 
+            // Fechar tabela desktop
             horsesHtml += `
                     </tbody>
                 </table>
-                
+            `;
+            
+            // Fechar cards mobile
+            mobileCardsHtml += `
+                </div>
+            `;
+            
+            // Combinar HTML desktop e mobile
+            const finalHtml = horsesHtml + mobileCardsHtml + `
                 <div class="export-buttons">
                     <div class="export-btn-text">📥 Exportar Dados</div>
                     <button class="export-btn" onclick="exportData('excel')">📊 Excel (.xlsx)</button>
                     <button class="export-btn" onclick="exportData('csv')">📄 CSV</button>
-                    <button class="export-btn" onclick="exportData('json')">📋 JSON</button>
+                    <button class="export-btn" onclick="exportData('json')">🔗 JSON</button>
                 </div>
             `;
-
-            document.getElementById('horsesSection').innerHTML = horsesHtml;
+            
+            document.getElementById('horsesSection').innerHTML = finalHtml;
             console.log('horsesSection updated with HTML including export buttons');
             console.log('Export buttons should now be visible');
         }
